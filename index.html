@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Logo turtle</title>
+        <style>
+            canvas {
+                border: 1px solid;
+            }
+            form {
+                margin: 10px 0;
+            }
+            input,
+            button {
+                font-size: 1.4em;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Logo Turtle</h1>
+        <canvas width="500" height="400" id="canvas"></canvas>
+        <form id="cmd-form">
+            <input type="text" id="cmd-input" />
+            <button>Run</button>
+        </form>
+        <script>
+            const canvas = document.querySelector("#canvas")
+            const cmdForm = document.querySelector("#cmd-form")
+            const cmdInput = document.querySelector("#cmd-input")
+            const ctx = canvas.getContext("2d")
+            const commands = []
+
+            cmdForm.addEventListener("submit", runCommand)
+
+            runCommand()
+
+            function runCommand(e) {
+                if (e) {
+                    e.preventDefault()
+                }
+                const cmd = cmdInput.value
+                cmdInput.value = ""
+                const parsedCommand = parseCmd(cmd)
+                ctx.restore()
+                ctx.clearRect(0, 0, canvas.width, canvas.height)
+                ctx.save()
+                ctx.translate(canvas.width / 2, canvas.height / 2)
+
+                if (parsedCommand.dir) {
+                    commands.push(parsedCommand)
+                }
+                for (let command of commands) {
+                    draw(command)
+                }
+                drawTurtle()
+                console.log("the parsed commands are: ", commands)
+            }
+
+            function draw(command) {
+                const { dir, angle, value } = command
+                ctx.rotate(angle)
+                if (dir === "FORWARD" || dir === "BACKWARD") {
+                    console.log("draw command", command)
+                    ctx.beginPath()
+                    ctx.moveTo(0, 0)
+                    ctx.lineTo(0, value)
+                    ctx.translate(0, value)
+                    ctx.closePath()
+                    ctx.stroke()
+                }
+            }
+
+            function drawTurtle() {
+                ctx.beginPath()
+                ctx.moveTo(-10, -10)
+                ctx.lineTo(0, 10)
+                ctx.lineTo(10, -10)
+                ctx.closePath()
+                ctx.stroke()
+            }
+
+            function parseCmd(command) {
+                console.log("command to parse", command)
+                let [dir, value] = command.split(" ")
+                let angle = 0
+                let resultDir = ""
+                value = Number(value)
+                switch (dir.toUpperCase()) {
+                    case "FD":
+                        resultDir = "FORWARD"
+                        break
+                    case "BK":
+                        resultDir = "BACKWARD"
+                        angle = 180
+                        break
+                    case "LT":
+                        resultDir = "LEFT"
+                        angle = -value
+                        break
+                    case "RT":
+                        resultDir = "RIGHT"
+                        angle = value
+                        break
+                }
+                return {
+                    dir: resultDir,
+                    value,
+                    angle: deg2Rad(angle),
+                }
+            }
+
+            function deg2Rad(deg) {
+                return (deg * Math.PI) / 180
+            }
+        </script>
+    </body>
+</html>
